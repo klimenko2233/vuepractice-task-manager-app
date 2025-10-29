@@ -3,6 +3,12 @@
     <div class="list-header">
       <div class="header-left">
         <h2>Tasks ({{ filteredTasks.length }})</h2>
+        <button
+            @click="showCreateModal = true"
+            class="create-task-btn"
+        >
+          + New Task
+        </button>
         <div class="view-controls">
           <button
               v-for="view in viewModes"
@@ -117,6 +123,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import TaskCard from './TaskCard.vue'
 import type { ITask } from '../../store/types';
+import TaskModal from './TaskModal.vue';
 
 const store = useStore();
 
@@ -245,21 +252,19 @@ onMounted(() => {
   color: white;
 }
 
-.create-btn {
-  background: var(--accent-color);
+.create-task-btn {
+  background: #4a90e2;
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 14px;
+  margin-right: 12px;
 }
 
-.create-btn:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
+.create-task-btn:hover {
+  background: #357ae8;
 }
 
 .filters-section {
