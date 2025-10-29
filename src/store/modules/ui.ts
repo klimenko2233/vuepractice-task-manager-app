@@ -1,5 +1,5 @@
-import { Module } from 'vuex'
 import type { UIState } from '../types';
+import type { Module } from 'vuex/types/index.js'
 
 const uiModule: Module<UIState, any> = {
     namespaced: true,
@@ -17,7 +17,7 @@ const uiModule: Module<UIState, any> = {
     },
 
     mutations: {
-        SET_THEME(state, theme: 'light' | 'darh') {
+        SET_THEME(state, theme: 'light' | 'dark') {
             state.theme = theme;
             document.documentElement.setAttribute('data-theme', theme);
         },
@@ -31,7 +31,7 @@ const uiModule: Module<UIState, any> = {
         TOGGLE_SIDEBAR(state) {
             state.sidebarOpen = !state.sidebarOpen;
         },
-        SET_CURRENT_VIEW(state, view: 'tasks' | 'projects' | 'analitics') {
+        SET_CURRENT_VIEW(state, view: 'tasks' | 'projects' | 'analytics') {
             state.currentView = view;
         }
     },

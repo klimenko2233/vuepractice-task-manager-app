@@ -1,5 +1,5 @@
-import {Module} from 'vuex';
 import type {IProject} from '../types';
+import type { Module } from 'vuex/types/index.js'
 
 interface ProjectsState {
     projects: IProject[];
@@ -9,28 +9,28 @@ interface ProjectsState {
 const projectsModule: Module<ProjectsState, any> = {
     namespaced: true,
 
-    state: () => ({
+    state: (): ProjectsState => ({
         projects: [
             {
                 id: '1',
                 name: 'Personal',
                 color: '#4CAF50',
                 description: 'Personal tasks and assignments',
-                taskCount: 0
+                taskCount: '0'
             },
             {
                 id: '2',
                 name: 'Work',
                 color: '#2196F3',
                 description: 'Work-related tasks',
-                taskCount: 0
+                taskCount: '0'
             },
             {
                 id: '3',
                 name: 'Learning',
                 color: '#FF9800',
                 description: 'Self-education and development',
-                taskCount: 0
+                taskCount: '0'
             }
         ],
         currentProjectId: null
@@ -40,7 +40,7 @@ const projectsModule: Module<ProjectsState, any> = {
         currentProject: (state) => {
             return state.projects.find(project => project.id === state.currentProjectId)
         },
-        projectsWithStats: (state, getters, rootState) => {
+        projectsWithStats: (state, _, rootState) => {
             return state.projects.map(project => ({
                 ...project,
                 taskCount: rootState.tasks.tasks.filter((task: any) =>
@@ -53,7 +53,7 @@ const projectsModule: Module<ProjectsState, any> = {
         SET_PROJECTS(state, projects: IProject[]) {
             state.projects = projects;
         },
-        ADD_PROJECT(state, project: IProject[]) {
+        ADD_PROJECT(state, project: IProject) {
             state.projects.push(project);
         },
         UPDATE_PROJECT(state, updatedProject: IProject) {
@@ -63,7 +63,7 @@ const projectsModule: Module<ProjectsState, any> = {
             }
         },
         DELETE_PROJECT(state, projectId: string) {
-            state.project = state.project.filter(project => project.id !== projectId);
+            state.projects = state.projects.filter(project => project.id !== projectId);
         },
         SET_CURRENT_PROJECT(state, projectId: string | null) {
             state.currentProjectId = projectId;
@@ -75,7 +75,7 @@ const projectsModule: Module<ProjectsState, any> = {
             const newProject: IProject = {
                 ...projectData,
                 id: Date.now().toString(),
-                taskCount: 0
+                taskCount: '0'
             };
             commit('ADD_PROJECT', newProject);
             return newProject;

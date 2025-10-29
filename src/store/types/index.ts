@@ -1,5 +1,5 @@
 export interface ITask {
-    id: number;
+    id: string;
     title: string;
     description: string;
     completed: boolean;
@@ -16,7 +16,7 @@ export interface IProject {
     name: string;
     color: string;
     description?: string;
-    taskCount: Date;
+    taskCount: string;
 }
 
 export interface ITag {
@@ -29,7 +29,7 @@ export interface FilterState {
     searchQuery: string;
     status: 'all' | 'active' | 'completed';
     priority: 'all' | 'low' | 'medium' | 'high';
-    projectIds: string | null;
+    projectId: string | null;
     tagIds: string[];
 }
 

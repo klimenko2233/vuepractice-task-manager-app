@@ -1,10 +1,12 @@
 import { createStore } from 'vuex'
-import taskModule from './modules/tasks.ts';
-import projectsModule from './modules/projects.ts';
-import tagsModule from './modules/tags.ts';
-import uiModule from './modules/ui.ts';
+import taskModule from './modules/tasks';
+import projectsModule from './modules/projects';
+import tagsModule from './modules/tags';
+import uiModule from './modules/ui';
 
-export default createStore({
+interface RootState {}
+
+export default createStore<RootState>({
     modules: {
         tasks:taskModule,
         projects:projectsModule,
@@ -13,12 +15,12 @@ export default createStore({
     },
 
     actions: {
-        saveAllToLocalStorage({ dispatch }) {
+        saveAllToLocalStorage({ dispatch }: any) {
             dispatch('tasks/saveToLocalStorage', null, { root: true });
             dispatch('projects/saveToLocalStorage', null, { root: true });
             dispatch('tags/saveToLocalStorage', null, { root: true });
         },
-        loadAllFromLocalStorage({ dispatch }) {
+        loadAllFromLocalStorage({ dispatch }: any) {
             dispatch('tasks/fetchTasks', null, { root: true });
         }
     }

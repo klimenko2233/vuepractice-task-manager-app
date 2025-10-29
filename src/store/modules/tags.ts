@@ -1,5 +1,5 @@
-import {Module} from 'vuex';
 import type {ITag} from '../types';
+import type { Module } from 'vuex/types/index.js'
 
 interface TagsState {
     tags: ITag[];
@@ -7,7 +7,7 @@ interface TagsState {
 
 const tagsModule: Module<TagsState, any> = {
     namespaced: true,
-    state: () => ({
+    state: ():TagsState => ({
         tags: [
             {
                 id: '1',
@@ -43,14 +43,14 @@ const tagsModule: Module<TagsState, any> = {
     }),
 
     getters: {
-        tagsWithStats: (state, getters, rootState) => {
+        tagsWithStats: (state, _, rootState) => {
             return state.tags.map(tag => ({
                 ...tag,
                 taskCount: rootState.tasks.tasks.filter((task: any) =>
                     task.tagIds.includes(tag.id)).length
             }))
         },
-        popularTags: (state, getters) => {
+        popularTags: (_, getters) => {
             return (getters.tagsWithStats as any[])
                 .filter(tag => tag.taskCount > 0)
                 .sort((a, b) => b.taskCount - a.taskCount);
