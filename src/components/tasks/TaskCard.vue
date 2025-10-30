@@ -1,143 +1,105 @@
 <template>
-  <div :class="['task-card', { completed: task.completed, 'priority-high': task.priority === 'high' }]">
-    <div class="task-checkbox">
-      <button
-          @click="$emit('toggle', task.id)"
-          :class="['checkbox', { checked: task.completed}]"
-      >
-        <span v-if="task.completed">✅</span>
-      </button>
-    </div>
-
-    <div class="task-content" @click="$emit('edit', task)">
-      <div class="task-header">
+  <div class="task-card" :class="{ completed: task.completed }">
+    <div class="task-header">
+      <div class="task-title-section">
+        <input
+            type="checkbox"
+            :checked="task.completed"
+            @change="$emit('toggle', task.id)"
+            class="task-checkbox"
+        />
         <h3 class="task-title">{{ task.title }}</h3>
-        <div class="task-priority" :class="`priority-${task.priority}`">
-          {{ priorityIcons[task.priority] }}
-        </div>
       </div>
-
-      <p v-if="task.description" class="task-description">
-        {{ task.description }}
-      </p>
-
-      <div class="task-meta">
-        <div class="meta-item" v-if="task.projectId">
-          <span class="project-badge" :style="{ backgroundColor: projectColor }">
-            {{ projectName }}
-          </span>
-        </div>
-
-        <div class="meta-item" v-if="task.dueDate">
-          <span class="due-date" :class="{ overdue: isOverdue }">
-            📅 {{ formattedDueDate }}
-          </span>
-        </div>
-
-        <div class="meta-item" v-if="taskTags.length > 0">
-          <span
-              v-for="tag in taskTags"
-              :key="tag.id"
-              class="tag"
-              :style="{ backgroundColor: tag.color + '20', color: tag.color, borderColor: tag.color}"
-          >
-            {{ tag.name }}
-          </span>
-        </div>
-      </div>
-
-      <div class="task-footer">
-        <span class="created-at">
-          Created: {{ formatedDate(task.createdAt) }}
-        </span>
+      <div class="task-actions">
+        <button @click="$emit('edit', task)" class="btn-icon">✏️</button>
+        <button @click="$emit('delete', task.id)" class="btn-icon">🗑️</button>
       </div>
     </div>
 
-    <div class="task-actions">
-      <button
-          @click="$emit('delete', task.id)"
-          class="action-btn delete-btn"
-          title="Delete"
+    <p class="task-description" v-if="task.description">{{ task.description }}</p>
+
+    <div class="task-meta">
+      <span class="task-priority" :class="task.priority">
+        {{ priorityIcons[task.priority] }}
+      </span>
+
+      <span class="task-project" v-if="project">
+        {{ project.name }}
+      </span>
+
+      <span class="task-date" v-if="task.dueDate">
+        {{ formatDate(task.dueDate) }}
+      </span>
+    </div>
+
+    <div class="task-tags" v-if="taskTags.length > 0">
+      <span
+          v-for="tag in taskTags"
+          :key="tag.id"
+          class="tag"
+          :style="{ backgroundColor: tag.color || '#e0e0e0' }"
       >
-        🗑️
-      </button>
+        {{ tag.name }}
+      </span>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import {computed} from 'vue';
-import {useStore} from 'vuex';
-import type {ITask, IProject, ITag} from '../../store/types';
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import type {ITask, ITag, IProject} from '../../store/types';
 
 interface Props {
   task: ITask;
 }
 
 const props = defineProps<Props>();
-defineEmits<{
-  toggle: [id: string]
-  edit: [task: ITask]
-  delete: [id: string]
-}>()
 
 const store = useStore();
 
-const projects = computed(() => store.state.projects.projects);
-const tags = computed(() => store.state.tags.tags);
-
-const project = computed(() =>
-    projects.value.find((p: IProject) => p.id === props.task.projectId)
-);
-
-const projectName = computed(() => project.value?.name || 'Unknown');
-const projectColor = computed(() => project.value?.color || '#6b7280');
-
-const taskTags = computed(() =>
-    tags.value.filter((tag: ITag) => props.task.tagIds.includes(tag.id))
-);
-
-const isOverdue = computed(() => {
-  if (!props.task.dueDate || props.task.completed) return false;
-  return new Date(props.task.dueDate) < new Date();
-});
-
-const formattedDueDate = computed(() => {
-  if (!props.task.dueDate) return '';
-  return new Date(props.task.dueDate).toLocaleDateString();
-});
-
 const priorityIcons = {
-  high: '🔥',
+  low: '🔵',
   medium: '🟡',
-  low: '🔵'
+  high: '🔥'
 };
 
-const formatedDate = (date: Date) => {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric'
-  });
+const tags = computed(() => store.state.tags.tags || []);
+const projects = computed(() => store.state.projects.projects || []);
+
+const project = computed(() => {
+  return projects.value.find((p: IProject) => p.id === props.task.projectId);
+});
+
+const taskTags = computed(() => {
+  if (!props.task.tagIds || !Array.isArray(props.task.tagIds)) {
+    return [];
+  }
+  return tags.value.filter((tag: ITag) =>
+      props.task.tagIds?.includes(tag.id) || false
+  );
+});
+
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString();
 };
 </script>
 
 <style scoped>
 .task-card {
-  display: flex;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 1.25rem;
-  gap: 1rem;
+  padding: 20px;
+  box-shadow: var(--shadow);
   transition: all 0.3s ease;
   position: relative;
-  box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
 .task-card:hover {
-  transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
-  border-color: var(--accent-color);
+  transform: translateY(-2px);
 }
 
 .task-card.completed {
@@ -145,195 +107,142 @@ const formatedDate = (date: Date) => {
   background: var(--bg-secondary);
 }
 
-.task-card.completed .task-title {
-  text-decoration: line-through;
-  color: var(--text-muted);
-}
-
-.task-card.priority-high {
-  border-left: 4px solid var(--danger-color);
-}
-
-.task-checkbox {
-  display: flex;
-  align-items: flex-start;
-}
-
-.checkbox {
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--border-color);
-  border-radius: 50%;
-  background: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.checkbox:hover {
-  border-color: var(--accent-color);
-  transform: scale(1.1);
-}
-
-.checkbox.checked {
-  background: var(--success-color);
-  border-color: var(--success-color);
-  color: white;
-}
-
-.task-content {
-  flex: 1;
-  cursor: pointer;
-  min-width: 0;
+.task-card.completed::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-color);
 }
 
 .task-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.5rem;
-  gap: 1rem;
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.task-title-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.task-checkbox {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: var(--accent-color);
 }
 
 .task-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: var(--text-primary);
   margin: 0;
+  font-size: 1.1rem;
   line-height: 1.4;
-  flex: 1;
+  color: var(--text-primary);
+  font-weight: 600;
+  word-break: break-word;
 }
-
-.task-priority {
-  font-size: 1.2rem;
-  flex-shrink: 0;
-}
-
-.task-description {
-  color: var(--text-secondary);
-  font-size: 0.9rem;
-  line-height: 1.5;
-  margin-bottom: 1rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.task-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.meta-item {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.project-badge {
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: white;
-}
-
-.due-date {
-  padding: 0.25rem 0.5rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 500;
-  background: var(--bg-secondary);
-  color: var(--text-secondary);
-}
-
-.due-date.overdue {
-  background: var(--danger-color);
-  color: white;
-}
-
-.tag {
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  border: 1px solid;
-}
-
-/* Футер */
-.task-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.created-at {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
 
 .task-actions {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  opacity: 0;
-  transition: opacity 0.2s ease;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
-.task-card:hover .task-actions {
-  opacity: 1;
-}
-
-.action-btn {
-  background: none;
+.btn-icon {
+  background: var(--bg-secondary);
   border: none;
-  padding: 0.5rem;
-  border-radius: 6px;
   cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.2s;
+  color: var(--text-secondary);
 }
 
-.edit-btn:hover {
+.btn-icon:hover {
   background: var(--accent-color);
   color: white;
   transform: scale(1.1);
 }
 
-.delete-btn:hover {
-  background: var(--danger-color);
-  color: white;
-  transform: scale(1.1);
+.task-description {
+  margin: 0 0 16px 0;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  word-break: break-word;
 }
 
-@media (max-width: 768px) {
+.task-meta {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.task-priority, .task-project, .task-date {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.task-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 0.75rem;
+  padding: 4px 8px;
+  border-radius: 12px;
+  color: white;
+  font-weight: 500;
+  background: var(--accent-color);
+}
+
+.dark-theme .task-priority.high {
+  background: #7f1d1d;
+  color: #fca5a5;
+}
+
+.dark-theme .task-priority.medium {
+  background: #78350f;
+  color: #fdba74;
+}
+
+.dark-theme .task-priority.low {
+  background: #064e3b;
+  color: #6ee7b7;
+}
+
+@media (max-width: 480px) {
   .task-card {
-    padding: 1rem;
-    gap: 0.75rem;
+    padding: 16px;
   }
 
   .task-header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
+    gap: 8px;
   }
 
   .task-actions {
-    flex-direction: row;
-    opacity: 1;
-  }
-
-  .action-btn {
-    padding: 0.4rem;
-    font-size: 0.9rem;
+    align-self: flex-end;
   }
 }
 </style>

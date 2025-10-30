@@ -11,5 +11,6 @@ import TaskList from './../components/tasks/TaskList.vue'
 <style scoped>
 .tasks-view {
   height: 100%;
+  background: var(--bg-primary);
 }
 </style>

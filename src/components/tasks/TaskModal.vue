@@ -14,6 +14,7 @@
               type="text"
               placeholder="Task title"
               required
+              class="form-input"
           >
         </div>
 
@@ -23,13 +24,14 @@
               v-model="formData.description"
               placeholder="Task description"
               rows="3"
+              class="form-textarea"
           ></textarea>
         </div>
 
         <div class="form-row">
           <div class="form-group">
             <label>Project *</label>
-            <select v-model="formData.projectId" required>
+            <select v-model="formData.projectId" required class="form-select">
               <option value="">Select project</option>
               <option
                   v-for="project in projects"
@@ -43,7 +45,7 @@
 
           <div class="form-group">
             <label>Priority</label>
-            <select v-model="formData.priority">
+            <select v-model="formData.priority" class="form-select">
               <option value="low">Low</option>
               <option value="medium">Medium</option>
               <option value="high">High</option>
@@ -57,6 +59,7 @@
             <input
                 v-model="formData.dueDate"
                 type="date"
+                class="form-input"
             >
           </div>
 
@@ -68,7 +71,7 @@
                     v-for="tag in selectedTagObjects"
                     :key="tag.id"
                     class="tag-pill"
-                    :style="{ backgroundColor: tag.color || '#6b7280' }"
+                    :style="{ backgroundColor: tag.color || 'var(--text-muted)' }"
                 >
                   {{ tag.name }}
                   <button
@@ -85,7 +88,7 @@
                     v-model="tagSearch"
                     @focus="showTagSuggestions = true"
                     placeholder="Type to search tags..."
-                    class="tag-search-input"
+                    class="tag-search-input form-input"
                     @input="handleTagSearch"
                 >
 
@@ -99,7 +102,7 @@
                   >
                     <span
                         class="tag-color-dot"
-                        :style="{ backgroundColor: tag.color || '#666' }"
+                        :style="{ backgroundColor: tag.color || 'var(--text-muted)' }"
                     ></span>
                     {{ tag.name }}
                     <span v-if="isTagSelected(tag.id)" class="check-mark">✓</span>
@@ -204,7 +207,6 @@ onUnmounted(() => {
   document.removeEventListener('click', closeSuggestions);
 });
 
-// Исправленный watch - добавлен immediate: true
 watch(() => props.task, (task) => {
   if (task && props.mode === 'edit') {
     formData.value = {
@@ -216,7 +218,6 @@ watch(() => props.task, (task) => {
       tagIds: [...task.tagIds]
     };
   } else if (props.mode === 'create') {
-    // Сброс формы при создании
     formData.value = {
       title: '',
       description: '',
@@ -246,55 +247,62 @@ const handleSubmit = () => {
   justify-content: center;
   z-index: 1000;
   padding: 20px;
+  backdrop-filter: blur(4px);
 }
 
 .modal {
-  background: white;
-  border-radius: 8px;
+  background: var(--bg-card);
+  border-radius: 12px;
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 24px;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .modal-header h3 {
   margin: 0;
   font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .close-btn {
-  background: none;
+  background: var(--bg-secondary);
   border: none;
-  font-size: 24px;
+  font-size: 20px;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
   padding: 0;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: all 0.2s ease;
 }
 
 .close-btn:hover {
-  color: #333;
+  background: var(--accent-color);
+  color: white;
 }
 
 .modal-form {
-  padding: 20px;
+  padding: 24px;
 }
 
 .form-group {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .form-row {
@@ -305,54 +313,67 @@ const handleSubmit = () => {
 
 label {
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-primary);
   font-size: 14px;
 }
 
-input, select, textarea {
+.form-input,
+.form-select,
+.form-textarea {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
   font-size: 14px;
   box-sizing: border-box;
-}
-
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  border-color: #4a90e2;
-}
-
-textarea {
-  resize: vertical;
-  min-height: 60px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: all 0.2s ease;
   font-family: inherit;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.5;
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
 }
 
 .tags-container {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .selected-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 8px;
 }
 
 .tag-pill {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #6b7280;
   color: white;
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 16px;
   font-size: 12px;
   font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .tag-remove {
@@ -369,10 +390,12 @@ textarea {
   font-size: 12px;
   padding: 0;
   line-height: 1;
+  transition: all 0.2s ease;
 }
 
 .tag-remove:hover {
   background: rgba(255, 255, 255, 0.5);
+  transform: scale(1.1);
 }
 
 .tags-input-wrapper {
@@ -381,15 +404,6 @@ textarea {
 
 .tag-search-input {
   width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-}
-
-.tag-search-input:focus {
-  outline: none;
-  border-color: #4a90e2;
 }
 
 .tag-suggestions {
@@ -397,37 +411,44 @@ textarea {
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  max-height: 150px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  max-height: 200px;
   overflow-y: auto;
   z-index: 10;
+  margin-top: 4px;
 }
 
 .tag-suggestion {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 10px 12px;
   cursor: pointer;
   transition: background 0.2s;
   font-size: 14px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tag-suggestion:last-child {
+  border-bottom: none;
 }
 
 .tag-suggestion:hover {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .tag-suggestion.selected {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: var(--accent-color);
+  color: white;
 }
 
 .tag-color-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
@@ -435,7 +456,6 @@ textarea {
 .check-mark {
   margin-left: auto;
   font-weight: bold;
-  color: #4caf50;
 }
 
 .modal-actions {
@@ -444,43 +464,88 @@ textarea {
   gap: 12px;
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-color);
 }
 
 .btn {
-  padding: 8px 16px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  min-width: 80px;
 }
 
 .btn-cancel {
-  background: #f5f5f5;
-  color: #333;
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
 }
 
 .btn-cancel:hover {
-  background: #e0e0e0;
+  transform: translateY(-1px);
 }
 
 .btn-primary {
-  background: #4a90e2;
+  background: var(--accent-color);
   color: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover {
-  background: #357ae8;
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* Темная тема */
+.dark-theme .modal-overlay {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.dark-theme .tag-suggestion.selected {
+  background: var(--accent-color);
+}
+
+.dark-theme .tag-remove {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dark-theme .tag-remove:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* Адаптивность */
 @media (max-width: 600px) {
-  .form-row {
-    grid-template-columns: 1fr;
+  .modal-overlay {
+    padding: 16px;
   }
 
   .modal {
-    margin: 10px;
+    max-height: calc(100vh - 32px);
+  }
+
+  .modal-header {
+    padding: 20px;
+  }
+
+  .modal-form {
+    padding: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn {
+    width: 100%;
   }
 
   .tag-suggestions {
@@ -490,6 +555,20 @@ textarea {
     right: 20px;
     transform: translateY(-50%);
     max-height: 60vh;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-header {
+    padding: 16px;
+  }
+
+  .modal-form {
+    padding: 16px;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
   }
 }
 </style>

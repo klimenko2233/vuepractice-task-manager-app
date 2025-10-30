@@ -144,7 +144,11 @@ const taskModule: Module<TasksState, any> = {
         UPDATE_TASK(state, updatedTask: ITask) {
             const index = state.tasks.findIndex(task => task.id === updatedTask.id);
             if (index !== -1) {
-                state.tasks.splice(index, 1, updatedTask);
+                state.tasks.splice(index, 1, {
+                    ...state.tasks[index],
+                    ...updatedTask,
+                    updatedAt: new Date()
+                });
             }
         },
         DELETE_TASK(state, taskId: string) {
